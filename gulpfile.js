@@ -7,7 +7,7 @@ const clean = require('gulp-clean');
 const tsProject = tsLoader.createProject('tsconfig.json');
 
 function compile() {
-  return gulp.src('src/**/*.ts')
+  return gulp.src('src/**/*.{ts,tsx}')
     .pipe(tsProject())
     .pipe(minify({
       ext: {
