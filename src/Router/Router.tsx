@@ -115,7 +115,6 @@ export const Router = memo(function Router(props: RouterProps) {
 
   // Performs history pop state action
   const goBack = useCallback(() => {
-    console.log(history.index);
     if (history.index === 0) {
       return console.warn(
         'History\'s goBack was not performed due to current ' +
