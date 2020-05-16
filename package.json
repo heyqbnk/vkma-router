@@ -59,10 +59,8 @@
     "webpack-dev-server": "^3.11.0"
   },
   "dependencies": {
-    "@vkontakte/vk-bridge": "^2.2.1",
     "history": "^4.10.1",
-    "qs": "^6.9.4",
-    "react": "^16.13.1"
+    "qs": "^6.9.4"
   },
   "config": {
     "commitizen": {
@@ -79,5 +77,9 @@
     "src/**/*.{ts,tsx}": [
       "eslint --fix"
     ]
+  },
+  "peerDependencies": {
+    "@vkontakte/vk-bridge": "^2.2.1",
+    "react": "^16.13.1"
   }
 }
