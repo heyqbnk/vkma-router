@@ -6,6 +6,7 @@
   "repository": "git@github.com:wolframdeus/vkma-router.git",
   "author": "Vladislav Kibenko <wolfram.deus@gmail.com>",
   "license": "MIT",
+  "keywords": ["vk-mini-apps", "routing", "vk", "vkma"],
   "files": [
     "dist/**/*"
   ],

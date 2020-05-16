@@ -77,7 +77,7 @@ export enum PopupsEnum {
 export const tree = {
   views: {
     // We use create set to make type inferring correct due to it is unavailable
-    // to do in usual arrays
+    // to do it in usual arrays
     [ViewsEnum.Registration]: createSet([PanelsEnum.Personal, PanelsEnum.Photo]),
     [ViewsEnum.Main]: createSet([
       PanelsEnum.News, PanelsEnum.Settings, PanelsEnum.Messages
@@ -107,7 +107,7 @@ export const history: HistoryState<AppTree>[] = [];
 // In VKMA applications, meaningful path is passed in hash
 const state = historyStateFromURL(window.location.hash);
 
-// Vaildate if needed
+// Validate if needed
 if (state && isStateInTree(state, tree)) {
   history.push(state);
 } else {
