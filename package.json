@@ -1,6 +1,6 @@
 {
   "name": "vkma-router",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "repository": "git@github.com:wolframdeus/vkma-router.git",
@@ -17,7 +17,7 @@
     "validate": "npm-run-all lint test",
     "commit": "git-cz",
     "prerelease": "npm-run-all validate build",
-    "release": "standard-version -a",
+    "release": "standard-version -a && yarn publish --non-interactive",
     "release:tags": "git push --follow-tags origin master && yarn publish --non-interactive",
     "release:github": "dotenv -e .env -- conventional-github-releaser -p eslint",
     "postrelease": "npm-run-all release:*"
