@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.0.5](https://github.com/wolframdeus/vkma-router/compare/v1.0.4...v1.0.5) (2020-05-16)
+
+
+### Bug Fixes
+
+* **console.log:** removed console.log ([08e9a13](https://github.com/wolframdeus/vkma-router/commit/08e9a136395699f146d29c0c863d6062f1a150b1))
+
 ### [1.0.4](https://github.com/wolframdeus/vkma-router/compare/v1.0.3...v1.0.4) (2020-05-16)
 
 
