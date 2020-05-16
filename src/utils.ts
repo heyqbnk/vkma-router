@@ -4,12 +4,6 @@ import {RouterContext, RouterProps} from './Router/types';
 import {RouterLink, RouterLinkProps} from './RouterLink';
 import {Router, useRouter} from './Router';
 
-type CreateProjectTuple<T extends RoutingTree> = [
-  ComponentType<RouterProps<T>>,
-  ComponentType<RouterLinkProps<T>>,
-  () => RouterContext<T> | null
-];
-
 /**
  * Creates set by passed elements
  * @param {ElemId[]} elements
@@ -23,11 +17,24 @@ export function createSet<ElemId extends IdType>(elements: ElemId[]): { [E in El
 }
 
 /**
- * Creates library utils which allow to work with components and hooks
- * safely
- * @returns {CreateProjectTuple<T>}
+ * Creates Router component. In fact, returns Router, but typed depending on T
+ * @returns {React.ComponentType<RouterProps<T>>}
  */
-export function createProject<T extends RoutingTree>(): CreateProjectTuple<T> {
-  return [Router, RouterLink, () => useRouter<T>()];
+export const createRouterComponent = <T extends RoutingTree>(): ComponentType<RouterProps<T>> => Router;
+
+/**
+ * Creates RouterLink component. In fact, returns RouterLink, but typed
+ * depending on T
+ * @returns {React.ComponentType<RouterLinkProps<T>>}
+ */
+export function createRouterLinkComponent<T extends RoutingTree>(): ComponentType<RouterLinkProps<T>> {
+  return RouterLink;
 }
 
+/**
+ * Creates useRouter hook. In fact, returns useRouter, but typed depending on T
+ * @returns {() => (RouterContext<T> | null)}
+ */
+export function createUseRouter<T extends RoutingTree>(): () => RouterContext<T> | null {
+  return useRouter;
+}
