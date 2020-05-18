@@ -27,7 +27,7 @@ export const createRouterComponent = <T extends RoutingTree>(): ComponentType<Ro
  * @returns {React.ComponentType<RouterLinkProps<T>>}
  */
 export function createRouterLinkComponent<T extends RoutingTree>(): ComponentType<RouterLinkProps<T>> {
-  return RouterLink;
+  return RouterLink as ComponentType<RouterLinkProps<T>>;
 }
 
 /**

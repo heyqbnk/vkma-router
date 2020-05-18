@@ -1,7 +1,7 @@
 import {
   AnyHistoryState,
   AnyHistoryUpdateStateType, AnyNonIndexedHistoryState,
-  HistoryState, NonIndexedHistoryState,
+  NonIndexedHistoryState,
 } from '../types';
 import {RoutingTree} from '../types';
 import {parse, stringify} from 'qs';
