@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.2.2](https://github.com/wolframdeus/vkma-router/compare/v1.2.1...v1.2.2) (2020-05-18)
+
+
+### Bug Fixes
+
+* **component creators:** fixed createRouterLinkComponent ([74b0a2e](https://github.com/wolframdeus/vkma-router/commit/74b0a2e1873fb08ca78c7086297b5c7148103322))
+
 ### [1.2.1](https://github.com/wolframdeus/vkma-router/compare/v1.2.0...v1.2.1) (2020-05-18)
 
 
