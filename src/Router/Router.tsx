@@ -197,6 +197,29 @@ export const Router = memo(function Router(props: RouterProps) {
     });
   }, [history]);
 
+  // When history object changes, it is required to stay synced with
+  // browser history
+  useEffect(() => {
+    const entriesToPush = history.entries.slice(1, history.index + 1);
+
+    entriesToPush.forEach(({state}) => {
+      window.history.pushState(state, '', '#' + historyStateToURL(state));
+
+      // Update location in bridge
+      vkBridge.send('VKWebAppSetLocation', {
+        location: historyStateToURL(currentState),
+      });
+    });
+
+    // When history is going to be garbage collected, go back on remaining
+    // count of entries
+    return () => {
+      if (history.index > 0) {
+        window.history.go(-history.index);
+      }
+    };
+  }, [history]);
+
   // Every time browser history changes, we should notify memory history
   // about it
   useEffect(() => {

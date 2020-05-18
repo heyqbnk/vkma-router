@@ -1,8 +1,7 @@
 import {IdType, RoutingTree} from './types';
 import {ComponentType} from 'react';
-import {RouterContext, RouterProps} from './Router/types';
+import {Router, useRouter, RouterContext, RouterProps} from './Router';
 import {RouterLink, RouterLinkProps} from './RouterLink';
-import {Router, useRouter} from './Router';
 
 /**
  * Creates set by passed elements
