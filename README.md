@@ -46,6 +46,35 @@ each history element should be correct. It means, that each history item should
 exist in routing tree. Otherwise, an error will be thrown. This behaviour
 is preventable too but not recommended as well.
 
+## Concept
+
+### How it works
+According to we know that application created on base of VK Mini Apps
+represents usual web application with usual browser APIs, `vkma-router`
+uses History API along with `history` package.
+
+`Router` creates memory history which allows us to avoid `Zero state panic`.
+The reason we chose memory history, but not usual browser or hash history
+is they dont allow us to go through history freely. Moreover, initial state
+is always empty (pathname is "/" and state is null) which, in our context,
+means `Zero state panic`. Using memory history, we are setting initial
+state and first item in history is always correct and not removable.
+
+### Popstate event
+
+`Router` is watching for windows's `popstate` event and detects where
+memory router should go. It works always correctly because each time, `popstate`
+event is called, it sends state with which we can detect needed direction.
+
+### History API and Bridge location updates
+
+It is important to mention, that you have no need to call 
+`window.history.pushState` after using router and calling `pushState` due to
+the reason `pushState` is doing it internally. 
+
+`vkBridge`'s method `VKWebAppSetLocation` is called every time when current 
+state changes.
+
 ## Usage
 ### Tree
 ```typescript
@@ -97,12 +126,12 @@ const _: AppTree = tree;
 
 ### Initial history
 ```typescript
-import {historyStateFromURL, isStateInTree, HistoryState} from 'vkma-router';
+import {historyStateFromURL, isStateInTree, NonIndexedHistory} from 'vkma-router';
 import {tree, AppTree, ViewsEnum, PanelsEnum} from './tree';
 
 // Create history. It is only an example and you create history based on logic
 // of your application
-export const history: HistoryState<AppTree>[] = []; 
+export const history: NonIndexedHistory<AppTree> = []; 
 
 // In VKMA applications, meaningful path is passed in hash
 const state = historyStateFromURL(window.location.hash);

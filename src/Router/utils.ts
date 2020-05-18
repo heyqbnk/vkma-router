@@ -1,21 +1,21 @@
 import {
   AnyHistoryState,
-  AnyHistoryUpdateStateType,
-  HistoryState,
+  AnyHistoryUpdateStateType, AnyNonIndexedHistoryState,
+  HistoryState, NonIndexedHistoryState,
 } from '../types';
 import {RoutingTree} from '../types';
 import {parse, stringify} from 'qs';
 
 /**
  * Checks if passed state exists in tree
- * @param {HistoryState<T>} state
- * @param tree
+ * @param {AnyHistoryState | AnyNonIndexedHistoryState} state
+ * @param {RoutingTree} tree
  * @returns {boolean}
  */
-export function isStateInTree<T extends RoutingTree>(
-  state: AnyHistoryState,
-  tree: T,
-): state is HistoryState<T> {
+export function isStateInTree(
+  state: AnyHistoryState | AnyNonIndexedHistoryState,
+  tree: RoutingTree,
+): boolean {
   const {view, panel, popup} = state;
 
   // Truthy in case when full path to panel exists and popup is found
@@ -29,7 +29,7 @@ export function isStateInTree<T extends RoutingTree>(
  * @param {string} url
  * @returns {AnyHistoryState | null}
  */
-export function historyStateFromURL(url: string): AnyHistoryState | null {
+export function historyStateFromURL(url: string): AnyNonIndexedHistoryState | null {
   const qIndex = url.indexOf('?');
   const sIndex = url.indexOf('/');
   const _url = url.slice(sIndex + 1, qIndex === -1 ? url.length : qIndex);
@@ -54,7 +54,7 @@ export function historyStateFromURL(url: string): AnyHistoryState | null {
  * @returns {string}
  */
 export function historyStateToURL<T extends RoutingTree>(
-  state: HistoryState<T>,
+  state: NonIndexedHistoryState<T>,
 ): string {
   const {view, panel, popup, query} = state;
   const queryStr = stringify(query);
@@ -65,15 +65,23 @@ export function historyStateToURL<T extends RoutingTree>(
 
 /**
  * Correctly merges history state with update payload
- * @param {AnyHistoryState} current
+ * @param currentState
  * @param {AnyHistoryUpdateStateType} payload
+ * @param index
  * @returns {AnyHistoryState}
  */
-export function extendState(
-  current: AnyHistoryState,
+export function constructState(
+  currentState: AnyHistoryState,
   payload: AnyHistoryUpdateStateType,
+  index?: number,
 ): AnyHistoryState {
-  return {...current, query: {}, popup: null, ...payload};
+  return {
+    ...currentState,
+    query: {},
+    popup: null,
+    ...payload,
+    index: typeof index === 'undefined' ? currentState.index : index,
+  };
 }
 
 /**

@@ -10,7 +10,7 @@ import React, {
 import {routerContext} from './context';
 import {createMemoryHistory} from 'history';
 import {
-  extendState,
+  constructState,
   historyStateFromURL,
   historyStateToURL,
   isStateInTree,
@@ -58,7 +58,12 @@ export const Router = memo(function Router(props: RouterProps) {
           );
         }
       }
-      initialHistory.forEach(state => h.push(historyStateToURL(state), state));
+
+      // Push all history states to memory history
+      initialHistory.forEach((state, index) => {
+        const formattedState: AnyHistoryState = {...state, index};
+        h.push(historyStateToURL(formattedState), formattedState);
+      });
     } else {
       // Otherwise pass current location
       const url = window.location.hash;
@@ -68,23 +73,21 @@ export const Router = memo(function Router(props: RouterProps) {
         throw new Error('There are no initial states while creating history');
       }
 
-      h.push(url, state);
+      h.push(url, {...state, index: 0});
     }
 
     return h;
   }, [tree, validate]);
 
   // Previous history state
-  const [prevState, setPrevState] = useState<AnyHistoryState | null>(() => {
-    return history.index === 0
-      ? null
-      : history.entries[history.index - 1].state;
-  });
+  const [prevState, setPrevState] = useState<AnyHistoryState | null>(
+    () => history.index === 0 ? null : history.entries[history.index - 1].state,
+  );
 
   // Current history state
-  const [currentState, setCurrentState] = useState<AnyHistoryState>(() => {
-    return history.entries[history.index].state;
-  });
+  const [currentState, setCurrentState] = useState<AnyHistoryState>(
+    () => history.entries[history.index].state,
+  );
 
   // Current location
   const [location, setLocation] = useState<RouterLocation>(() => {
@@ -95,12 +98,10 @@ export const Router = memo(function Router(props: RouterProps) {
   // Pushes state to history
   const pushState = useCallback((
     historyState: AnyHistoryUpdateStateType,
-    validatePush?: boolean,
+    shouldValidate = validate,
   ) => {
-    const state = extendState(currentState, historyState);
+    const state = constructState(currentState, historyState, history.index + 1);
     const url = historyStateToURL(state);
-    const shouldValidate = validatePush
-      || (typeof validatePush === 'undefined' && validate);
 
     if (shouldValidate && !isStateInTree(state, tree)) {
       return console.warn(
@@ -109,32 +110,19 @@ export const Router = memo(function Router(props: RouterProps) {
       );
     }
 
+    // Push new state to memory and browser histories
     history.push(url, state);
     window.history.pushState(state, '', '#' + url);
   }, [history, currentState, tree, validate]);
-
-  // Performs history pop state action
-  const goBack = useCallback(() => {
-    if (history.index === 0) {
-      return console.warn(
-        'History\'s goBack was not performed due to current ' +
-        'location is the last one in history',
-      );
-    }
-    history.goBack();
-    window.history.back();
-  }, [history]);
 
   // Replaces current state
   const replaceState = useCallback(
     (
       historyState: AnyHistoryUpdateStateType,
-      validateReplace?: boolean,
+      shouldValidate = validate,
     ) => {
-      const state = extendState(currentState, historyState);
+      const state = constructState(currentState, historyState);
       const url = historyStateToURL(state);
-      const shouldValidate = validateReplace
-        || (typeof validateReplace === 'undefined' && validate);
 
       if (shouldValidate && !isStateInTree(state, tree)) {
         return console.warn(
@@ -144,16 +132,31 @@ export const Router = memo(function Router(props: RouterProps) {
         );
       }
 
+      // Replace state in memory and browser histories
       history.replace(url, state);
       window.history.replaceState(state, '', '#' + url);
     }, [history, currentState, tree, validate],
   );
 
+  // Performs history pop state action
+  const goBack = useCallback(() => {
+    if (history.index === 0) {
+      return console.warn(
+        'History\'s goBack was not performed due to current ' +
+        'location is the last one in history',
+      );
+    }
+
+    // Go back in memory and browser histories
+    history.goBack();
+    window.history.back();
+  }, [history]);
+
   // Creates url
   const createHref = useCallback((
     historyState: AnyHistoryUpdateStateType,
   ) => {
-    const state = extendState(currentState, historyState);
+    const state = constructState(currentState, historyState);
     const url = historyStateToURL(state);
     const qIndex = url.indexOf('?');
 
@@ -175,41 +178,40 @@ export const Router = memo(function Router(props: RouterProps) {
 
   // Listen for history changes to update currentState
   useEffect(() => {
-    return history.listen(() => {
-      const {pathname, search, hash} = history.location;
+    return history.listen(({pathname, search, hash, state}) => {
       const nextLocation = {pathname, search, hash};
-      const prevState = history.index === 0
-        ? null
-        : history.entries[history.index - 1].state;
-      const currentState = history.entries[history.index].state;
+      const prevState = history.entries[state.index - 1]?.state || null;
 
       // Update internal state
       setPrevState(prevState);
-      setCurrentState(currentState);
-      setLocation(location => {
-        return shallowEqual(location, nextLocation) ? location : nextLocation;
-      });
-
-      // Update location in bridge
-      vkBridge.send('VKWebAppSetLocation', {
-        location: historyStateToURL(currentState),
-      });
+      setCurrentState(state);
+      setLocation(prevLocation => shallowEqual(prevLocation, nextLocation)
+        ? prevLocation
+        : nextLocation);
     });
   }, [history]);
 
   // When history object changes, it is required to stay synced with
-  // browser history
+  // browser history. So we push history elements on mount, and go back on
+  // unmount
   useEffect(() => {
+    // We are ignoring first element due to this has to be non popable
+    // element
     const entriesToPush = history.entries.slice(1, history.index + 1);
 
-    entriesToPush.forEach(({state}) => {
-      window.history.pushState(state, '', '#' + historyStateToURL(state));
+    if (entriesToPush.length > 0) {
+      const {pathname, search} = entriesToPush[entriesToPush.length - 1];
+
+      entriesToPush.forEach(({pathname, search, state}) => {
+        // Push to browser's history
+        window.history.pushState(state, '', '#' + pathname + search);
+      });
 
       // Update location in bridge
       vkBridge.send('VKWebAppSetLocation', {
-        location: historyStateToURL(currentState),
+        location: pathname + search,
       });
-    });
+    }
 
     // When history is going to be garbage collected, go back on remaining
     // count of entries
@@ -224,23 +226,20 @@ export const Router = memo(function Router(props: RouterProps) {
   // about it
   useEffect(() => {
     const listener = (e: PopStateEvent) => {
-      const prev = history.entries[history.index - 1];
-
-      // User came back when e.state became null (its entry point where state
-      // does not exist) or new url equals to previous one
-      if (
-        e.state === null ||
-        (prev && historyStateToURL(prev.state) === historyStateToURL(e.state))
-      ) {
-        return history.goBack();
-      }
-      history.goForward();
+      const state = e.state as AnyHistoryState | null;
+      history.go(state === null ? -history.index : state.index - history.index);
     };
-
     window.addEventListener('popstate', listener);
 
     return () => window.removeEventListener('popstate', listener);
   }, [history]);
+
+  // When current state changes update location in bridge
+  useEffect(() => {
+    vkBridge.send('VKWebAppSetLocation', {
+      location: historyStateToURL(currentState),
+    });
+  }, [currentState]);
 
   return <Provider value={context}>{children}</Provider>;
 });

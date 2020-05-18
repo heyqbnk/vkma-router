@@ -1,5 +1,10 @@
 import {ReactNode, ReactNodeArray} from 'react';
-import {RoutingTree, HistoryState, HistoryUpdateStateType} from '../../types';
+import {
+  RoutingTree,
+  HistoryState,
+  HistoryUpdateStateType,
+  NonIndexedHistoryState,
+} from '../../types';
 
 /**
  * Router location
@@ -9,6 +14,11 @@ export interface RouterLocation {
   search: string;
   hash: string;
 }
+
+/**
+ * History without indexes
+ */
+export type NonIndexedHistory<T extends RoutingTree = RoutingTree> = NonIndexedHistoryState<T>[];
 
 /**
  * Router context
@@ -64,7 +74,7 @@ export interface RouterProps<T extends RoutingTree = RoutingTree> {
   /**
    * Initial router history
    */
-  initialHistory?: HistoryState<T>[];
+  initialHistory?: NonIndexedHistory<T>;
 
   /**
    * Children

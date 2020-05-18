@@ -10,25 +10,31 @@ import {RoutingTree, GetTreeRoutes} from './tree';
  */
 export type HistoryState<T extends RoutingTree> =
   GetTreeRoutes<T>
-  & { query: ParsedQs };
+  & { query: ParsedQs; index: number };
+
+/**
+ * History state without index
+ */
+export type NonIndexedHistoryState<T extends RoutingTree> = Omit<HistoryState<T>, 'index'>
 
 /**
  * History update state with view, panel, optional popup and optional query
  */
 export type HistoryUpdateViewState<T extends RoutingTree> =
-  UnionPartialBy<HistoryState<T>, 'popup' | 'query'>;
+  UnionPartialBy<NonIndexedHistoryState<T>, 'popup' | 'query'>;
 
 /**
  * History update state with panel, optional popup and optional query
  */
 export type HistoryUpdatePanelState<T extends RoutingTree> =
-  UnionPartialBy<Omit<HistoryState<T>, 'view'>, 'popup' | 'query'>;
+  UnionPartialBy<Omit<NonIndexedHistoryState<T>, 'view'>, 'popup' | 'query'>;
 
 /**
  * History update state with popup and optional query
  */
 export type HistoryUpdatePopupState<T extends RoutingTree> =
-  UnionPick<UnionPartialBy<HistoryState<T>, 'query'>, 'popup' | 'query'>;
+  UnionPick<UnionPartialBy<NonIndexedHistoryState<T>, 'query'>,
+    'popup' | 'query'>;
 
 /**
  * History update state with query
@@ -45,5 +51,6 @@ export type HistoryUpdateStateType<T extends RoutingTree> =
   | HistoryUpdateQueryState;
 
 export type AnyHistoryState = HistoryState<RoutingTree>;
+export type AnyNonIndexedHistoryState = NonIndexedHistoryState<RoutingTree>;
 export type AnyHistoryUpdateStateType = HistoryUpdateStateType<RoutingTree>;
 
