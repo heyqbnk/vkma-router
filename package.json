@@ -68,7 +68,7 @@
   },
   "dependencies": {
     "history": "^4.10.1",
-    "qs": "^6.9.4"
+    "qs": "^6.9.7"
   },
   "config": {
     "commitizen": {
